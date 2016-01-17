@@ -1,0 +1,85 @@
+*.py[cod]
+
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+lib
+lib64
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+nosetests.xml
+**/node_modules
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+
+# PyCharm
+workspace.xml
+
+# Sir Emacs
+*~
+.emacs.desktop*
+
+# Mercurial
+.hg*
+
+# Classes
+*.class
+
+/MobileLogsAPI/.idea/dictionaries
+
+# generated
+
+generated/**
+
+#my local build
+
+#mrtasks/.log*
+.log*
+
+#eclipse-mini unwanted files:
+eclipse-mini/configuration/org.eclipse.update/*
+eclipse-mini/configuration/org.eclipse.core.runtime/*
+eclipse-mini/configuration/org.eclipse.osgi/*
+eclipse-mini/configuration/*.log
+eclipse-mini/p2/*
+
+# idea project files
+/.idea/*
+!.idea/vcs.xml
+
+#maven
+target/*
+
+log-api.iml
+.DS_Store
+objc-api/LogsNGTest/LogsNGTest.xcodeproj/project.pbxproj
+objc-api/LogsNGTest/LogsNGTest.xcodeproj/project.xcworkspace/xcshareddata/LogsNGTest.xccheckout
+
+#vim
+*.swp
+
+#tests
+*.diff

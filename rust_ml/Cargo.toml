@@ -1,0 +1,6 @@
+[package]
+name = "rust_ml"
+version = "0.1.0"
+authors = ["Vasily Levchenko <minamoto@yandex-team.ru>"]
+
+[dependencies]
