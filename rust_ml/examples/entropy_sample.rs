@@ -1,0 +1,36 @@
+extern crate rust_ml;
+use rust_ml::junk::minamoto::entropy;
+
+pub enum EvenOddClass {
+    Even,
+    Odd
+}
+
+impl entropy::Classified<EvenOddClass> for i32 {
+    fn class(&self) -> EvenOddClass {
+        match self % 2 {
+            0 => EvenOddClass::Even,
+            _ => EvenOddClass::Odd
+        }
+    }
+}
+
+impl PartialEq for EvenOddClass {
+    fn eq (&self, rhs:&EvenOddClass) -> bool {
+        match (self, rhs) {
+            (&EvenOddClass::Even, &EvenOddClass::Even) => true,
+            (&EvenOddClass::Odd, &EvenOddClass::Odd) => true,
+            (_, _) => false
+        }
+    }
+
+    fn ne(&self, rhs:&EvenOddClass) -> bool {
+        !self.eq(rhs)
+    }
+}
+
+fn main() {
+    let set = vec!(2i32,4i32,6i32, 8i32, 9i32);
+    let classes = vec!(EvenOddClass::Even, EvenOddClass::Odd);
+    println!("{}", entropy::entropy(&set, &classes));
+}
