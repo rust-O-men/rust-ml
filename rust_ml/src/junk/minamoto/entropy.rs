@@ -14,3 +14,9 @@ pub fn entropy<C:PartialEq, T:Classified<C>>(data:&Vec<T>, classes:&Vec<C>) -> f
     }
     sum
 }
+
+pub fn gain<C:PartialEq, T:Classified<C>>(data:&Vec<T>, classes:&Vec<C>, class:C) -> f64 {
+    let target = vec![class];
+    entropy(data, classes) - entropy(data, &target)
+}
+

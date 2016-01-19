@@ -33,4 +33,5 @@ fn main() {
     let set = vec!(2i32,4i32,6i32, 8i32, 9i32);
     let classes = vec!(EvenOddClass::Even, EvenOddClass::Odd);
     println!("{}", entropy::entropy(&set, &classes));
+    println!("gain odd {}", entropy::gain(&set, &classes, EvenOddClass::Odd));
 }
