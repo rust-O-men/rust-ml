@@ -1,7 +1,7 @@
 extern crate rust_ml;
 use rust_ml::junk::minamoto::entropy;
 
-#[derive(Clone)]
+#[derive(Clone,Debug)]
 pub enum EvenOddClass {
     Even,
     Odd
