@@ -1,21 +1,42 @@
+use std::collections::HashMap;
+use std::collections::hash_map::Iter;
+use std::hash::Hash;
 
 pub trait Classified<T> {
     fn class(&self) -> T;
 }
 
-pub fn entropy<C:PartialEq, T:Classified<C>>(data:&Vec<T>, classes:&Vec<C>) -> f64 {
-    let mut sum: f64 = 0f64;
-    for c in classes {
-        let mut p: f64;
-        p = data.iter().filter(|&x| x.class() == *c).fold(0f64, |x, _y| x + 1f64);
-        p = p / (data.len() as f64);
-        p = - p * p.log2();
-        sum += p;
-    }
-    sum
+
+fn counters<T, C:Eq+Hash> (dataset:&Vec<(T,C)>) -> (HashMap<&C, u64>, f64) {
+    let mut counters = HashMap::new();
+    let count = dataset.len() as f64;
+
+    for d in dataset {
+        let num;
+        match counters.get(&d.1) {
+            Some(n) => num = n + 1,
+            None => num = 1
+        };
+        counters.insert(&d.1, num);
+    };
+    (counters,count)
 }
 
-pub fn gain<C:PartialEq+Clone, T:Classified<C>>(data:&Vec<T>, classes:&Vec<C>, class:&C) -> f64 {
-    let target = vec![class.clone()];
-    entropy(data, classes) - entropy(data, &target)
+fn entropy4iter<C:PartialEq+Eq+Hash>(iter:Iter<C,u64>, count:f64) -> f64 {
+    iter.fold(0f64, |x, y| {
+        let t:f64 = (*y.1 as f64)/count;
+        x + t * t.log2() 
+    })
+        
+}
+
+pub fn entropy<T, C:PartialEq+Eq+Hash>(dataset:&Vec<(T,C)>) -> f64 {
+    let (counters,count) = counters(dataset);
+    - entropy4iter(counters.iter(), count)
+}
+
+pub fn gain<T, C:PartialEq+Eq+Hash>(dataset:&Vec<(T,C)>, class:C) -> f64 {
+    let (mut counters,count) = counters(dataset);
+    counters.remove(&class);
+    - entropy4iter(counters.iter(), count)
 }
