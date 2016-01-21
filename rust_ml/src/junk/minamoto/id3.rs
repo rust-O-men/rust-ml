@@ -4,14 +4,12 @@ use super::entropy;
 use std::fmt::Display as Display;
 use std::fmt::Debug as Debug;
 
-pub fn create_tree<C:PartialEq+Clone+Debug, T:entropy::Classified<C>+Display+Clone>(dataset:&Vec<(T, C)>, classes:&Vec<C>)
-                                                          -> Box<tree::Node<T>> {
-    let set:Vec<T> = dataset.iter().map(|x| x.0.clone()).collect();
-    let entropies:Vec<(C, f64)> = classes.iter().map(|c| (c.clone(), entropy::gain(&set, &classes, c))).collect();
+pub fn create_tree<C:PartialEq, T>(dataset:&Vec<(T, C)>,
+                         rules:&Vec<Box<Fn(T)->bool>>,
+                         gain:Box<Fn(&Vec<(T,C)>, &C)->f64>)
+                         -> Option<Box<tree::Node<T>>> {
 
-    for s in entropies {
-        println!("{:?}", s)
-    }
-
-    Box::new(tree::Node{data:None, left:None, rigth:None})
+    //let entropy = entropy::entropy2(dataset);
+    
+    None
 }
