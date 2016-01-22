@@ -1,15 +1,29 @@
 use super::tree;
-use super::entropy;
+use std::rc::Rc;
 
-use std::fmt::Display as Display;
-use std::fmt::Debug as Debug;
-
-pub fn create_tree<C:PartialEq, T>(dataset:&Vec<(T, C)>,
-                         rules:&Vec<Box<Fn(T)->bool>>,
-                         gain:Box<Fn(&Vec<(T,C)>, &C)->f64>)
+pub fn create_tree<C:PartialEq, T>(dataset:&Vec<Rc<(T, C)>>,
+                         rules:&Vec<Rc<Fn(&T)->bool>>,
+                         gain:Box<Fn(&Vec<Rc<(T,C)>>, &C)->f64>)
                          -> Option<Box<tree::Node<T>>> {
 
-    //let entropy = entropy::entropy2(dataset);
+    let classes: Vec<&C> = dataset.iter().map(|x| {&x.1}).collect();
+    let mut score = Vec::new();
+
+    for r in rules {
+        let mut right = Rc::new(Vec::new());
+        let mut left = Rc::new(Vec::new());
+        for d in dataset {
+            if r(&d.0) {
+                Rc::get_mut(&mut left).unwrap().push(d.clone())
+            }
+            else {
+                Rc::get_mut(&mut right).unwrap().push(d.clone());
+            }
+        }
+        for &c in &classes {
+            score.push((Rc::new(r), Rc::new(c), gain(&left, &c), left.clone(), gain(&right, &c), right.clone()));
+        }
+    }
     
     None
 }
