@@ -1,5 +1,6 @@
 use super::tree;
 use std::rc::Rc;
+use std::cmp::Ordering;
 
 pub fn create_tree<C:PartialEq, T>(dataset:&Vec<Rc<(T, C)>>,
                          rules:&Vec<Rc<Fn(&T)->bool>>,
@@ -21,8 +22,22 @@ pub fn create_tree<C:PartialEq, T>(dataset:&Vec<Rc<(T, C)>>,
             }
         }
         for &c in &classes {
-            score.push((Rc::new(r), Rc::new(c), gain(&left, &c), left.clone(), gain(&right, &c), right.clone()));
+            score.push((Rc::new(r),
+                        Rc::new(c),
+                        gain(&left, &c),
+                        left.clone(),
+                        gain(&right, &c),
+                        right.clone()));
         }
+        score.sort_by(|x, y| {
+            if x.2 < y.2 && x.4 < y.4 {
+                return Ordering::Less
+            }
+            if x.2 == y.2 && x.4 == y.4 {
+                return Ordering::Equal
+            }
+            return Ordering::Greater
+        })
     }
     
     None
