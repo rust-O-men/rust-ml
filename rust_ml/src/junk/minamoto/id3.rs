@@ -10,7 +10,7 @@ pub struct Node<T,C> {
     pub right: Option<Rc<Node<T,C>>>
 }
 
-pub fn create_tree<C:PartialEq, T>(dataset:&Vec<(Rc<T>, Rc<C>)>,
+pub fn create_tree<C:Eq, T>(dataset:&Vec<(Rc<T>, Rc<C>)>,
                          rules:&Vec<Rc<Fn(&T)->bool>>,
                          gain:Rc<Fn(&Vec<(Rc<T>, Rc<C>)>, Rc<C>)->f64>)
                          ->  Option<Rc<Node<T,C>>> {
