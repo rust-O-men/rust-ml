@@ -1,15 +1,30 @@
-use super::tree;
 use std::rc::Rc;
 use std::cmp::Ordering;
+use std::option::Option;
 
-pub fn create_tree<C:PartialEq, T>(dataset:&Vec<Rc<(T, C)>>,
+
+pub struct Node<T,C> {
+    pub leaf: Option<Rc<C>>,
+    pub func: Option<Rc<Fn(&T) -> bool>>,
+    pub left: Option<Rc<Node<T,C>>>,
+    pub right: Option<Rc<Node<T,C>>>
+}
+
+pub fn create_tree<C:PartialEq, T>(dataset:&Vec<(Rc<T>, Rc<C>)>,
                          rules:&Vec<Rc<Fn(&T)->bool>>,
-                         gain:Box<Fn(&Vec<Rc<(T,C)>>, &C)->f64>)
-                         -> Option<Box<tree::Node<T>>> {
+                         gain:Rc<Fn(&Vec<(Rc<T>, Rc<C>)>, &C)->f64>)
+                         ->  Option<Rc<Node<T,C>>> {
 
-    let classes: Vec<&C> = dataset.iter().map(|x| {&x.1}).collect();
+    if dataset.len() == 0 {
+        return None;
+    } 
+
+    let classes: Vec<Rc<C>> = dataset.iter().map(|x| {x.1.clone()}).collect();
     let mut score = Vec::new();
 
+    if classes.len() == 1 {
+        return Some(Rc::new(Node{leaf:Some(classes[0].clone()), func:None, left:None, right:None}));
+    }
     for r in rules {
         let mut right = Rc::new(Vec::new());
         let mut left = Rc::new(Vec::new());
@@ -21,24 +36,30 @@ pub fn create_tree<C:PartialEq, T>(dataset:&Vec<Rc<(T, C)>>,
                 Rc::get_mut(&mut right).unwrap().push(d.clone());
             }
         }
-        for &c in &classes {
-            score.push((Rc::new(r),
+        for c in &classes {
+            score.push((r,
                         Rc::new(c),
                         gain(&left, &c),
                         left.clone(),
                         gain(&right, &c),
                         right.clone()));
         }
-        score.sort_by(|x, y| {
-            if x.2 < y.2 && x.4 < y.4 {
-                return Ordering::Less
-            }
-            if x.2 == y.2 && x.4 == y.4 {
-                return Ordering::Equal
-            }
-            return Ordering::Greater
-        })
     }
-    
-    None
+
+    score.sort_by(|x, y| {
+        if x.2 < y.2 && x.4 < y.4 {
+            return Ordering::Less
+        }
+        if x.2 == y.2 && x.4 == y.4 {
+            return Ordering::Equal
+        }
+        return Ordering::Greater
+    });
+
+    Some(Rc::new(Node{
+        func: Some(score[0].0.clone()),
+        leaf: None,
+        left: create_tree(&score[0].3.as_ref(), rules, gain.clone()),
+        right: create_tree(&score[0].5.as_ref(), rules, gain.clone())
+    }))
 }
