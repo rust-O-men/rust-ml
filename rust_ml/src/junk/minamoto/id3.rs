@@ -12,7 +12,7 @@ pub struct Node<T,C> {
 
 pub fn create_tree<C:PartialEq, T>(dataset:&Vec<(Rc<T>, Rc<C>)>,
                          rules:&Vec<Rc<Fn(&T)->bool>>,
-                         gain:Rc<Fn(&Vec<(Rc<T>, Rc<C>)>, &C)->f64>)
+                         gain:Rc<Fn(&Vec<(Rc<T>, Rc<C>)>, Rc<C>)->f64>)
                          ->  Option<Rc<Node<T,C>>> {
 
     if dataset.len() == 0 {
@@ -38,10 +38,10 @@ pub fn create_tree<C:PartialEq, T>(dataset:&Vec<(Rc<T>, Rc<C>)>,
         }
         for c in &classes {
             score.push((r,
-                        Rc::new(c),
-                        gain(&left, &c),
+                        c.clone(),
+                        gain(&left, c.clone()),
                         left.clone(),
-                        gain(&right, &c),
+                        gain(&right, c.clone()),
                         right.clone()));
         }
     }
