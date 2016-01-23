@@ -3,20 +3,18 @@ use rust_ml::junk::minamoto::id3;
 use rust_ml::junk::minamoto::entropy;
 use std::rc::Rc;
 
-#[derive(Copy, Clone, PartialEq, Debug)]
 enum Category {
 	A,
 	B,
 	C
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Hash, Eq)]
+#[derive(Hash,PartialEq,Eq)]
 enum Class {
 	C1,
 	C2
 }
 
-#[derive(Copy, Clone, Debug)]
 struct Record {
     category: Category,
     number: u8,	
