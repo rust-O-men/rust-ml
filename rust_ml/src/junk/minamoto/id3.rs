@@ -15,7 +15,7 @@ pub fn create_tree<C:Eq, T>(dataset:&Vec<(Rc<T>, Rc<C>)>,
                          gain:Rc<Fn(&Vec<(Rc<T>, Rc<C>)>, Rc<C>)->f64>)
                          ->  Option<Rc<Node<T,C>>> {
 
-    if dataset.len() == 0 {
+    if dataset.len() == 0 || rules.len() == 0 {
         return None;
     } 
 
@@ -25,11 +25,11 @@ pub fn create_tree<C:Eq, T>(dataset:&Vec<(Rc<T>, Rc<C>)>,
     if classes.len() == 1 {
         return Some(Rc::new(Node{leaf:Some(classes[0].clone()), func:None, left:None, right:None}));
     }
-    for r in rules {
+    for r in rules.iter().enumerate() {
         let mut right = Rc::new(Vec::new());
         let mut left = Rc::new(Vec::new());
         for d in dataset {
-            if r(&d.0) {
+            if r.1(&d.0) {
                 Rc::get_mut(&mut left).unwrap().push(d.clone())
             }
             else {
@@ -46,6 +46,8 @@ pub fn create_tree<C:Eq, T>(dataset:&Vec<(Rc<T>, Rc<C>)>,
         }
     }
 
+    let mut new_rules = rules.clone();
+    new_rules.remove((score[0].0).0);
     score.sort_by(|x, y| {
         if x.2 < y.2 && x.4 < y.4 {
             return Ordering::Less
@@ -57,9 +59,9 @@ pub fn create_tree<C:Eq, T>(dataset:&Vec<(Rc<T>, Rc<C>)>,
     });
 
     Some(Rc::new(Node{
-        func: Some(score[0].0.clone()),
+        func: Some((score[0].0).1.clone()),
         leaf: None,
-        left: create_tree(&score[0].3.as_ref(), rules, gain.clone()),
-        right: create_tree(&score[0].5.as_ref(), rules, gain.clone())
+        left: create_tree(&score[0].3.as_ref(), &new_rules, gain.clone()),
+        right: create_tree(&score[0].5.as_ref(), &new_rules, gain.clone())
     }))
 }
