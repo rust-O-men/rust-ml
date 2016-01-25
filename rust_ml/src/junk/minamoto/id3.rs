@@ -10,6 +10,22 @@ pub struct Node<T,C> {
     pub right: Option<Rc<Node<T,C>>>
 }
 
+/*
+pub fn build_func<C:Eq, T>(tree:Option<Rc<Node<T,C>>>)
+                          ->  Option<Rc<Fn(T)->Rc<C>>> {
+    match tree {
+        Some(r) => {
+            match r.as_ref() {
+                &Node {leaf:Some(ref l), func:None, left:None, right:None} => Some(Rc::new(|x| {l.clone()})),
+                &Node {leaf:None, func:Some(ref f), left:Some(ref l), right:Some(ref r)} => None,
+                &Node {..} => None,
+            }
+        }
+        None => None
+    }
+}
+*/
+
 pub fn create_tree<C:Eq, T>(dataset:&Vec<(Rc<T>, Rc<C>)>,
                          rules:&Vec<Rc<Fn(&T)->bool>>,
                          gain:Rc<Fn(&Vec<(Rc<T>, Rc<C>)>, Rc<C>)->f64>)
