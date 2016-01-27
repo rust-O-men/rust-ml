@@ -1,392 +1,186 @@
 
+mod api {
 
-#[derive(PartialEq, Clone)]
-pub enum FeatureType {
-	Boolean,
-	Category,
-	Number
-}
+	pub type Target = u32;
+	pub type Number = f64;
+	pub type Category = u32;
 
-#[derive(Clone)]
-pub struct MetaFeature {
-	pub name: String,
-	pub ftype: FeatureType,
-	pub count: u32
-}
+	pub type DataSet<T> = Vec<(T, Target)>;
 
-pub type Target = u32;
-pub type Number = f64;
-pub type Category = u32;
-
-pub trait Feature {
-	fn is_missed(&self) -> bool;
-	
-	fn is_boolean(&self) -> bool;
-	fn is_number(&self) -> bool;
-	fn is_category(&self) -> bool;	
-
-	fn as_boolean(&self) -> Option<bool>;
-	fn as_number(&self) -> Option<Number>;
-	fn as_category(&self) -> Option<Category>;
-}
-
-struct FeatureData<T> {
-	value: Option<T>
-}
-
-impl FeatureData<bool> {
-	
-	fn new(v: bool) -> FeatureData<bool> {
-		FeatureData{value: Some(v)}
+	pub enum FeatureType {
+		Boolean,
+		Category,
+		Number
 	}
 
-	fn missed() -> FeatureData<bool> {
-		FeatureData{value: None}
-	}
-}
+	pub trait RecordMeta {
+		
+		fn feature_count(&self) -> usize;
 
-impl Feature for FeatureData<bool> {
+		fn feature_name(&self, feature: usize) -> String;
+		fn feature_type(&self, feature: usize) -> FeatureType;
 
-	fn is_missed(&self) -> bool {
-		!self.value.is_some()
-	}
+		fn category_count(&self, feature: usize) -> usize;
 
-	fn is_boolean(&self) -> bool {
-		true
 	}
 
-	fn is_number(&self) -> bool {
-		false
-	}
+	pub trait DataSetMeta {
 
-	fn is_category(&self) -> bool {
-		false
-	}
-
-	fn as_boolean(&self) -> Option<bool> {
-		self.value.clone()
-	}
-
-	fn as_number(&self) -> Option<Number> {
-		None
-	}
-
-	fn as_category(&self) -> Option<Category> {
-		None
+		fn target_count(&self) -> usize;
+	    
 	}
 
 }
 
-pub fn boolean(v: bool) -> Box<Feature> {
-	Box::new(FeatureData::<bool>::new(v))
-}
+mod data {
 
-pub fn missed_boolean() -> Box<Feature> {
-	Box::new(FeatureData::<bool>::missed())
-}
+	use ::api;
 
-impl FeatureData<Number> {
-	
-	fn new(v: Number) -> FeatureData<Number> {
-		FeatureData{value: Some(v)}
+	pub struct Record {
+		pub category: api::Category,
+    	pub number: api::Number,	
+    	pub boolean: bool
 	}
 
-	fn missed() -> FeatureData<Number> {
-		FeatureData{value: None}
-	}
-}
+	impl api::RecordMeta for Record {
 
-impl Feature for FeatureData<Number> {
-
-	fn is_missed(&self) -> bool {
-		!self.value.is_some()
-	}
-
-	fn is_boolean(&self) -> bool {
-		false
-	}
-
-	fn is_number(&self) -> bool {
-		true
-	}
-
-	fn is_category(&self) -> bool {
-		false
-	}
-
-	fn as_boolean(&self) -> Option<bool> {
-		None
-	}
-
-	fn as_number(&self) -> Option<Number> {
-		self.value.clone()
-	}
-
-	fn as_category(&self) -> Option<Category> {
-		None
-	}
-
-}
-
-pub fn number(v: Number) -> Box<Feature> {
-	Box::new(FeatureData::<Number>::new(v))
-}
-
-pub fn missed_number() -> Box<Feature> {
-	Box::new(FeatureData::<Number>::missed())
-}
-
-impl FeatureData<Category> {
-	
-	fn new(v: Category) -> FeatureData<Category> {
-		FeatureData{value: Some(v)}
-	}
-
-	fn missed() -> FeatureData<Category> {
-		FeatureData{value: None}
-	}
-}
-
-impl Feature for FeatureData<Category> {
-
-	fn is_missed(&self) -> bool {
-		!self.value.is_some()
-	}
-
-	fn is_boolean(&self) -> bool {
-		false
-	}
-
-	fn is_number(&self) -> bool {
-		false
-	}
-
-	fn is_category(&self) -> bool {
-		true
-	}
-
-	fn as_boolean(&self) -> Option<bool> {
-		None
-	}
-
-	fn as_number(&self) -> Option<Number> {
-		None
-	}
-
-	fn as_category(&self) -> Option<Category> {
-		self.value.clone()
-	}
-
-}
-
-pub fn category(v: Category) -> Box<Feature> {
-	Box::new(FeatureData::<Category>::new(v))
-}
-
-pub fn missed_category() -> Box<Feature> {
-	Box::new(FeatureData::<Category>::missed())
-}
-
-pub struct Record {
-	pub features: Vec<Box<Feature>>,
-	pub target: Target
-}
-
-pub struct DataSet {
-	meta: Vec<MetaFeature>,
-	records: Vec<Record>,
-	tc: u32
-}
-
-impl DataSet {
-
-	fn new(meta_features: Vec<MetaFeature>, target_count: u32) -> DataSet {
-		DataSet{records: Vec::new(), meta: meta_features, tc: target_count}
-	}
-
-	fn add(&mut self, record: Record) -> &mut DataSet {
-		if self.meta.len() != record.features.len() {
-			panic!("Invalid record type!")
+		fn feature_count(&self) -> usize {
+			3
 		}
-		if record.target >= self.tc {
-			panic!("Invalid target!")	
-		}
-		for (i, f) in record.features.iter().enumerate() {
-			let b = f.is_boolean() && self.meta[i].ftype == FeatureType::Boolean;
-			let n = f.is_number() && self.meta[i].ftype == FeatureType::Number;
-			let c = f.is_category() && self.meta[i].ftype == FeatureType::Category;
-			if !b && !n && !c {
-				panic!("Invalid data type!")
+
+		fn feature_name(&self, feature: usize) -> String {
+			match feature {
+			    0 => "category".to_string(),
+			    1 => "number".to_string(),
+			    2 => "boolean".to_string(),
+			    _ => panic!("Unknown feature")
 			}
-		} 
-		self.records.push(record);
-		self
+		}
+
+		fn feature_type(&self, feature: usize) -> api::FeatureType {
+			match feature {
+			    0 => api::FeatureType::Category,
+			    1 => api::FeatureType::Number,
+			    2 => api::FeatureType::Boolean,
+			    _ => panic!("Unknown feature")
+			}	
+		}
+
+		fn category_count(&self, feature: usize) -> usize {
+			match feature {
+			    0 => 3,
+			    _ => panic!("Unknown feature")
+			}	
+
+		}
+
 	}
+
+	impl api::DataSetMeta for api::DataSet<Record> {
+
+		fn target_count(&self) -> usize {
+			2
+		}
+
+	}
+
+	pub fn read_data() -> api::DataSet<Record> {
+		let result = vec![
+			(Record{category: 0, number: 70.0, boolean: true }, 0),
+			(Record{category: 0, number: 90.0, boolean: true }, 1),
+			(Record{category: 0, number: 85.0, boolean: false}, 1),
+			(Record{category: 0, number: 95.0, boolean: false}, 1),
+			(Record{category: 0, number: 70.0, boolean: false}, 0),
+			(Record{category: 1, number: 90.0, boolean: true }, 0),
+			(Record{category: 1, number: 78.0, boolean: false}, 0),
+			(Record{category: 1, number: 65.0, boolean: true }, 0),
+			(Record{category: 1, number: 75.0, boolean: false}, 0),
+			(Record{category: 2, number: 80.0, boolean: true }, 1),
+			(Record{category: 2, number: 70.0, boolean: true }, 1),
+			(Record{category: 2, number: 80.0, boolean: false}, 0),
+			(Record{category: 2, number: 80.0, boolean: false}, 0),
+			(Record{category: 2, number: 96.0, boolean: false}, 0)
+		];
+		result
+	}
+
 
 }
 
-pub fn target_entropy(data: &DataSet) -> f64 {
-	let total = data.records.len();
-	let mut classes = vec![0; data.tc as usize];
-	for record in data.records.iter() {
-		classes[record.target as usize] += 1;
-	}
-	for class in classes.iter() {
-		if *class == 0 {
-			return 0f64	
-		}
-	}
-	let mut result = 0f64;
-	for class in classes.iter() {
-		let p = (*class as f64) / (total as f64);
-		result += p * p.log(2f64)
-	}
-	-result
-} 
+mod solve_func {
 
-fn boolean_entropy_helper(data: &DataSet, column: usize, boolean: bool) -> f64 {
-	let mut total = 0;
-	let mut classes = vec![0; data.tc as usize];
-	for record in data.records.iter() {
-		if record.features[column].as_boolean().unwrap() == boolean {
-			classes[record.target as usize] += 1;
-			total += 1;
-		}
+	use ::api;
+
+	pub fn information_gain<T: api::RecordMeta, F>(data: &api::DataSet<T>, criterion: &F, target_count: usize) -> f64 where F: Fn(&T) -> bool {
+		let e = target_entropy(data, target_count);
+		let fe = entropy(data, criterion, target_count);
+		e - fe
 	}
-	let mut result = 0f64;
-	for class in classes.iter() {
-		if *class != 0 {	
+
+	fn entropy_helper<T: api::RecordMeta, F>(data: &api::DataSet<T>, value: bool, criterion: &F, target_count: usize) -> f64 where F: Fn(&T) -> bool {
+		let mut total = 0;
+		let mut classes = vec![0; target_count];
+		for record in data.iter() {
+			if criterion(&record.0) == value {
+				classes[record.1 as usize] += 1;
+				total += 1;
+			}
+		}
+		let mut result = 0f64;
+		for class in classes.iter() {
+			if *class != 0 {	
+				let p = (*class as f64) / (total as f64);
+				result += p * p.log2()
+			} 
+		}
+		-result
+	}
+
+	fn entropy<T: api::RecordMeta, F>(data: &api::DataSet<T>, criterion: &F, target_count: usize) -> f64 where F: Fn(&T) -> bool {
+		let total = data.len();
+		let mut ccs = vec![0u8, 0u8];
+		let values = vec![false, true];
+		for record in data.iter() {
+			let i = match criterion(&record.0) {
+					false => 0,
+					true => 1,
+			};
+			ccs[i] += 1;
+		}
+		let mut result = 0f64;
+		for i in 0..2 {
+			let p = (ccs[i] as f64) / (total as f64);
+			result += p * entropy_helper(data, values[i], criterion, target_count); 
+		}
+		result
+	}
+
+	fn target_entropy<T: api::RecordMeta>(data: &api::DataSet<T>, target_count: usize) -> f64 {
+		let total = data.len();
+		let mut classes = vec![0; target_count];
+		for record in data.iter() {
+			classes[record.1 as usize] += 1;
+		}
+		for class in classes.iter() {
+			if *class == 0 {
+				return 0f64	
+			}
+		}
+		let mut result = 0f64;
+		for class in classes.iter() {
 			let p = (*class as f64) / (total as f64);
-			result += p * p.log(2f64)
-		} 
-	}
-	-result
-	
-}
-
-fn boolean_entropy(data: &DataSet, column: usize) -> f64 {
-	if data.meta[column].ftype != FeatureType::Boolean {
-		panic!("Not a boolean field!");
-	}
-	let total = data.records.len();
-	let mut ccs = vec![0u8, 0u8];
-	let values = vec![false, true];
-	for record in data.records.iter() {
-		let i = match record.features[column].as_boolean().unwrap() {
-				false => 0,
-				true => 1,
-		};
-		ccs[i] += 1;
-	}
-	let mut result = 0f64;
-	for i in 0..2 {
-		let p = (ccs[i] as f64) / (total as f64);
-		result += p * boolean_entropy_helper(data, column, values[i]); 
-	}
-	result
-}
-
-pub fn field_entropy(data: &DataSet, name: &str) -> f64 {
-	for (i, meta) in data.meta.iter().enumerate() {
-		if meta.name == name {
-			return match meta.ftype {
-				FeatureType::Boolean => boolean_entropy(data, i as usize),
-				_ => 0f64
-			}
+			result += p * p.log2()
 		}
-	}
-	panic!("Field not found!");
-}
+		-result
+	} 
 
-pub fn field_gain(data: &DataSet, name: &str) -> f64 {
-	let e = target_entropy(data);
-	let fe = field_entropy(data, name);
-	e - fe
 }
 
 fn main() {
+	use api::DataSetMeta;
+
     println!("Hello, ID3!");
-    let mut ds = DataSet::new(vec![
-    	MetaFeature{name: "category".to_string(), ftype: FeatureType::Category, count: 3},
-    	MetaFeature{name: "number".to_string(), ftype: FeatureType::Number, count: 0},
-    	MetaFeature{name: "boolean".to_string(), ftype: FeatureType::Boolean, count: 2}
-    ], 2);
-    ds.add(
-    	Record {
-    		features: vec![category(0), number(70.0), boolean(true)], 
-    		target: 0
-    	}
-    ).add(
-    	Record {
-    		features: vec![category(0), number(90.0), boolean(true)], 
-    		target: 1
-    	}
-    ).add(
-    	Record {
-    		features: vec![category(0), number(85.0), boolean(false)], 
-    		target: 1
-    	}
-    ).add(
-    	Record {
-    		features: vec![category(0), number(95.0), boolean(false)], 
-    		target: 1
-    	}
-    ).add(
-    	Record {
-    		features: vec![category(0), number(70.0), boolean(false)], 
-    		target: 0
-    	}
-    ).add(
-    	Record {
-    		features: vec![category(1), number(90.0), boolean(true)], 
-    		target: 0
-    	}
-    ).add(
-    	Record {
-    		features: vec![category(1), number(78.0), boolean(false)], 
-    		target: 0
-    	}
-    ).add(
-    	Record {
-    		features: vec![category(1), number(65.0), boolean(true)], 
-    		target: 0
-    	}
-    ).add(
-    	Record {
-    		features: vec![category(1), number(75.0), boolean(false)], 
-    		target: 0
-    	}
-    ).add(
-    	Record {
-    		features: vec![category(2), number(80.0), boolean(true)], 
-    		target: 1
-    	}
-    ).add(
-    	Record {
-    		features: vec![category(2), number(70.0), boolean(true)], 
-    		target: 1
-    	}
-    ).add(
-    	Record {
-    		features: vec![category(2), number(80.0), boolean(false)], 
-    		target: 0
-    	}
-    ).add(
-    	Record {
-    		features: vec![category(2), number(80.0), boolean(false)], 
-    		target: 0
-    	}
-    ).add(
-    	Record {
-    		features: vec![category(2), number(96.0), boolean(false)], 
-    		target: 0
-    	}
-    );
-    let te = target_entropy(&ds);
-    println!("Target entropy={}", te);
-    let be = field_entropy(&ds, "boolean");
-    println!("Boolean entropy={}", be);
-    let bg = field_gain(&ds, "boolean");
-    println!("Boolean gain={}", bg);
-    
+    let data = data::read_data(); 
+    let entropy = solve_func::information_gain(&data, &|rec| rec.boolean, data.target_count());  
+    println!("{}", entropy); 
 }
