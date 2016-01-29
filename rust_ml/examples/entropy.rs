@@ -1,38 +1,7 @@
-
-mod api {
-
-	pub type Target = u32;
-	pub type Number = f64;
-	pub type Category = u32;
-
-	pub struct DataSet<T> {
-		pub records: Vec<(T, Target)>,
-		pub target_count: usize
-	}
-
-	pub enum FeatureType {
-		Boolean,
-		Category,
-		Number
-	}
-
-	pub trait RecordMeta {
-		
-		fn feature_count(&self) -> usize;
-
-		fn feature_name(&self, feature: usize) -> String;
-		fn feature_type(&self, feature: usize) -> FeatureType;
-
-		fn category_count(&self, feature: usize) -> usize;
-
-	}
-
-
-}
+extern crate rust_ml;
 
 mod data {
-
-	use ::api;
+    use rust_ml::api;
 
 	pub struct Record {
 		pub category: api::Category,
@@ -101,10 +70,9 @@ mod data {
 }
 
 mod solve_func {
+    use rust_ml::api;
 
-	use ::api;
-
-	pub fn information_gain<T: api::RecordMeta, F>(data: &api::DataSet<T>, criterion: &F) -> f64 where F: Fn(&T) -> bool {
+    pub fn information_gain<T: api::RecordMeta, F>(data: &api::DataSet<T>, criterion: &F) -> f64 where F: Fn(&T) -> bool {
 		let e = target_entropy(data);
 		let fe = entropy(data, criterion);
 		e - fe
