@@ -1,18 +1,18 @@
 extern crate rust_ml;
 use rust_ml::criteria::gain;
-use rust_ml::dataset::dataset_1;
+use rust_ml::dataset::simple;
 use rust_ml::trees::id3;
 use rust_ml::api;
 
 fn main() {
 	println!("Hello, ID3!");
-	let data = dataset_1::read_data(); 
-	let boolean = |rec: &dataset_1::Record| rec.boolean;
-	let category_a = |rec: &dataset_1::Record| rec.category == 0;
-	let category_b = |rec: &dataset_1::Record| rec.category == 1;
-	let category_c = |rec: &dataset_1::Record| rec.category == 2;
-	let number = |rec: &dataset_1::Record| rec.number > 80.0;
-	let criterions :Vec<&api::Criterion<dataset_1::Record>> = vec![
+	let data = simple::read_data(); 
+	let boolean = |rec: &simple::Record| rec.boolean;
+	let category_a = |rec: &simple::Record| rec.category == 0;
+	let category_b = |rec: &simple::Record| rec.category == 1;
+	let category_c = |rec: &simple::Record| rec.category == 2;
+	let number = |rec: &simple::Record| rec.number > 80.0;
+	let criterions :Vec<&api::Criterion<simple::Record>> = vec![
 		&boolean, 
 		&category_a, 
 		&category_b, 
