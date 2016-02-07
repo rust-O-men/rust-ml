@@ -12,7 +12,7 @@ impl api::RecordMeta for Record {
         3
     }
 
-    fn feature_name(&self, feature: usize) -> String {
+    fn feature_name(&self, feature: api::Feature) -> String {
         match feature {
             0 => "category".to_string(),
             1 => "number".to_string(),
@@ -21,7 +21,7 @@ impl api::RecordMeta for Record {
         }
     }
 
-    fn feature_type(&self, feature: usize) -> api::FeatureType {
+    fn feature_type(&self, feature: api::Feature) -> api::FeatureType {
         match feature {
             0 => api::FeatureType::Category,
             1 => api::FeatureType::Number,
@@ -30,21 +30,21 @@ impl api::RecordMeta for Record {
         }   
     }
 
-    fn category_count(&self, feature: usize) -> usize {
+    fn category_count(&self, feature: api::Feature) -> usize {
         match feature {
             0 => 3,
             _ => panic!("Unknown feature")
         }
     }
 
-    fn number_value(&self, feature: usize) -> api::Number {
+    fn number_value(&self, feature: api::Feature) -> api::Number {
         match feature {
             1 => self.number,
             _ => panic!("Unknown feature")
         }
     }
 
-    fn category_value(&self, feature: usize) -> api::Category {
+    fn category_value(&self, feature: api::Feature) -> api::Category {
         match feature {
             0 => self.category,
             _ => panic!("Unknown feature")
@@ -52,7 +52,7 @@ impl api::RecordMeta for Record {
 
     }
 
-    fn bool_value(&self, feature: usize) -> bool {
+    fn bool_value(&self, feature: api::Feature) -> bool {
         match feature {
             2 => self.boolean,
             _ => panic!("Unknown feature")

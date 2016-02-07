@@ -13,7 +13,7 @@ impl api::RecordMeta for Record {
         4
     }
 
-    fn feature_name(&self, feature: usize) -> String {
+    fn feature_name(&self, feature: api::Feature) -> String {
         match feature {
             0 => "Sepal Length".to_string(),
             1 => "Sepal Width".to_string(),
@@ -23,7 +23,7 @@ impl api::RecordMeta for Record {
         }
     }
 
-    fn feature_type(&self, feature: usize) -> api::FeatureType {
+    fn feature_type(&self, feature: api::Feature) -> api::FeatureType {
         match feature {
             0 => api::FeatureType::Number,
             1 => api::FeatureType::Number,
@@ -33,11 +33,11 @@ impl api::RecordMeta for Record {
         }   
     }
 
-    fn category_count(&self, _: usize) -> usize {
+    fn category_count(&self, _: api::Feature) -> usize {
         panic!("Doesn't have category features")
     }
 
-    fn number_value(&self, feature: usize) -> api::Number {
+    fn number_value(&self, feature: api::Feature) -> api::Number {
         match feature {
             0 => self.sepal_length,
             1 => self.sepal_width,
@@ -47,11 +47,11 @@ impl api::RecordMeta for Record {
         }   
     }
 
-    fn category_value(&self, _: usize) -> api::Category {
+    fn category_value(&self, _: api::Feature) -> api::Category {
         panic!("Doesn't have category features")
     }
 
-    fn bool_value(&self, _: usize) -> bool {
+    fn bool_value(&self, _: api::Feature) -> bool {
         panic!("Doesn't have bool features")
     }
 
