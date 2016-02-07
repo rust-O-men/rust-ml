@@ -23,9 +23,9 @@ pub trait RecordMeta {
 
     fn category_count(&self, feature: Feature) -> usize;
 
-    fn number_value(&self, feature: Feature) -> Number;
-    fn category_value(&self, feature: Feature) -> Category;
-    fn bool_value(&self, feature: Feature) -> bool;
+    fn number_value(&self, feature: Feature) -> Option<Number>;
+    fn category_value(&self, feature: Feature) -> Option<Category>;
+    fn bool_value(&self, feature: Feature) -> Option<bool>;
 }
 
 pub type Criterion<T> = Fn(&T) -> bool;

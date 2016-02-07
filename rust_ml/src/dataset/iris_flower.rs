@@ -37,21 +37,21 @@ impl api::RecordMeta for Record {
         panic!("Doesn't have category features")
     }
 
-    fn number_value(&self, feature: api::Feature) -> api::Number {
+    fn number_value(&self, feature: api::Feature) -> Option<api::Number> {
         match feature {
-            0 => self.sepal_length,
-            1 => self.sepal_width,
-            2 => self.petal_length,
-            3 => self.petal_width,
+            0 => Some(self.sepal_length),
+            1 => Some(self.sepal_width),
+            2 => Some(self.petal_length),
+            3 => Some(self.petal_width),
             _ => panic!("Unknown feature")
         }   
     }
 
-    fn category_value(&self, _: api::Feature) -> api::Category {
+    fn category_value(&self, _: api::Feature) -> Option<api::Category> {
         panic!("Doesn't have category features")
     }
 
-    fn bool_value(&self, _: api::Feature) -> bool {
+    fn bool_value(&self, _: api::Feature) -> Option<bool> {
         panic!("Doesn't have bool features")
     }
 

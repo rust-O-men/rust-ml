@@ -37,24 +37,24 @@ impl api::RecordMeta for Record {
         }
     }
 
-    fn number_value(&self, feature: api::Feature) -> api::Number {
+    fn number_value(&self, feature: api::Feature) -> Option<api::Number> {
         match feature {
-            1 => self.number,
+            1 => Some(self.number),
             _ => panic!("Unknown feature")
         }
     }
 
-    fn category_value(&self, feature: api::Feature) -> api::Category {
+    fn category_value(&self, feature: api::Feature) -> Option<api::Category> {
         match feature {
-            0 => self.category,
+            0 => Some(self.category),
             _ => panic!("Unknown feature")
         }
 
     }
 
-    fn bool_value(&self, feature: api::Feature) -> bool {
+    fn bool_value(&self, feature: api::Feature) -> Option<bool> {
         match feature {
-            2 => self.boolean,
+            2 => Some(self.boolean),
             _ => panic!("Unknown feature")
         }
 
