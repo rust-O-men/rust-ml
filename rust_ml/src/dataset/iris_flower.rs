@@ -37,6 +37,24 @@ impl api::RecordMeta for Record {
         panic!("Doesn't have category features")
     }
 
+    fn number_value(&self, feature: usize) -> api::Number {
+        match feature {
+            0 => self.sepal_length,
+            1 => self.sepal_width,
+            2 => self.petal_length,
+            3 => self.petal_width,
+            _ => panic!("Unknown feature")
+        }   
+    }
+
+    fn category_value(&self, _: usize) -> api::Category {
+        panic!("Doesn't have category features")
+    }
+
+    fn bool_value(&self, _: usize) -> bool {
+        panic!("Doesn't have bool features")
+    }
+
 }
 
 pub const SETOSA: api::Target = 0;
