@@ -39,8 +39,8 @@ pub fn uniform_selector<T: api::RecordMeta>(data: &api::DataSet<T>, feature: api
             i = j % n;
         } 
     }
-    for packed in set.iter() {
-        result.push(unsafe{mem::transmute(*packed)});
+    for packed in set {
+        result.push(unsafe{mem::transmute(packed)});
     }
     result
 }
