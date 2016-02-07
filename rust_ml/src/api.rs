@@ -8,6 +8,7 @@ pub struct DataSet<T> {
     pub target_count: usize
 }
 
+#[derive(PartialEq, Eq)]
 pub enum FeatureType {
     Boolean,
     Category,
