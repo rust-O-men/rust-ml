@@ -9,13 +9,13 @@ enum Node {
     Target(api::Target)
  }
 
-pub fn id3<T>(data: &api::DataSet<T>, solver: &api::Solver<T>, criterions: &Vec<Box<api::Criterion<T>>>) -> Tree {
+pub fn id3<T: api::RecordMeta>(data: &api::DataSet<T>, solver: &api::Solver<T>, criterions: &Vec<Box<api::Criterion<T>>>) -> Tree {
     Tree {
         root: create_node(data, &api::all_view(data), solver, criterions)
     }
 }
 
-fn create_node<T>(data: &api::DataSet<T>, view: &api::DataSetView, solver: &api::Solver<T>, criterions: &Vec<Box<api::Criterion<T>>>) -> Box<Node> {
+fn create_node<T: api::RecordMeta>(data: &api::DataSet<T>, view: &api::DataSetView, solver: &api::Solver<T>, criterions: &Vec<Box<api::Criterion<T>>>) -> Box<Node> {
     let mut max = 0f64;
     let mut index = 0usize;
     for (i, criterion) in criterions.iter().enumerate() {
@@ -48,7 +48,7 @@ fn create_node<T>(data: &api::DataSet<T>, view: &api::DataSetView, solver: &api:
     }
 }
 
-fn calculate_target<T>(data: &api::DataSet<T>, view: &api::DataSetView) -> api::Target {
+fn calculate_target<T: api::RecordMeta>(data: &api::DataSet<T>, view: &api::DataSetView) -> api::Target {
     let mut classes = vec![0; data.target_count];
     for index in view.iter() {
         let record = &data.records[*index];
@@ -65,7 +65,7 @@ fn calculate_target<T>(data: &api::DataSet<T>, view: &api::DataSetView) -> api::
     target as u32
 }
 
-fn apply_node<T>(node: &Box<Node>, record: &T, criterions: &Vec<Box<api::Criterion<T>>>) -> api::Target {
+fn apply_node<T: api::RecordMeta>(node: &Box<Node>, record: &T, criterions: &Vec<Box<api::Criterion<T>>>) -> api::Target {
     match **node {
         Node::Target(target) => target,
         Node::Fork(ref left, ref right, criterion) => {
@@ -80,7 +80,7 @@ fn apply_node<T>(node: &Box<Node>, record: &T, criterions: &Vec<Box<api::Criteri
 
 impl Tree {
 
-    pub fn apply<T>(&self, record: &T, criterions: &Vec<Box<api::Criterion<T>>>) -> api::Target {
+    pub fn apply<T: api::RecordMeta>(&self, record: &T, criterions: &Vec<Box<api::Criterion<T>>>) -> api::Target {
         apply_node(&self.root, record, criterions)
     }
 }
