@@ -4,12 +4,10 @@ pub struct Tree {
     root: Box<Node>
 }
 
-struct Node {
-    left: Option<Box<Node>>,
-    right: Option<Box<Node>>,
-    criterion: Option<usize>,
-    target: Option<api::Target>
-}
+enum Node {
+    Fork(Box<Node>, Box<Node>, usize),
+    Target(api::Target)
+ }
 
 pub fn id3<T>(data: &api::DataSet<T>, solver: &api::Solver<T>, criterions: &Vec<Box<api::Criterion<T>>>) -> Tree {
     Tree {
@@ -44,14 +42,9 @@ fn create_node<T>(data: &api::DataSet<T>, view: &api::DataSetView, solver: &api:
         } else {
             calculate_target(data, &right_records)
         };
-        Box::new(Node{left: None, right: None, criterion: None, target: Some(target)})
+        Box::new(Node::Target(target))
     } else {
-        Box::new(Node{
-            left: Some(create_node(data, &left_records, solver, criterions)), 
-            right: Some(create_node(data, &right_records, solver, criterions)), 
-            criterion: Some(index), 
-            target: None
-        })
+        Box::new(Node::Fork(create_node(data, &left_records, solver, criterions), create_node(data, &right_records, solver, criterions), index))
     }
 }
 
@@ -73,20 +66,13 @@ fn calculate_target<T>(data: &api::DataSet<T>, view: &api::DataSetView) -> api::
 }
 
 fn apply_node<T>(node: &Box<Node>, record: &T, criterions: &Vec<Box<api::Criterion<T>>>) -> api::Target {
-    match node.target {
-        Some(target) => target,
-        None => {
-            let criterion = node.criterion.unwrap();
+    match **node {
+        Node::Target(target) => target,
+        Node::Fork(ref left, ref right, criterion) => {
             if criterions[criterion](record) {
-                match node.right {
-                    Some(ref nnode) => apply_node(nnode, record, criterions),
-                    None => panic!("assimetric tree")
-                }
+                apply_node(right, record, criterions)
             } else {
-                match node.left {
-                    Some(ref nnode) => apply_node(nnode, record, criterions),
-                    None => panic!("assimetric tree")
-                }
+                apply_node(left, record, criterions)
             }
         }
     }
