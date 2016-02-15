@@ -1,5 +1,6 @@
 use super::super::api;
 
+#[derive (Clone)]
 pub struct Record {
     pub category: api::Category,
     pub number: api::Number,

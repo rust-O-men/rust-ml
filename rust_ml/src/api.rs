@@ -3,6 +3,8 @@ pub type Number = f64;
 pub type Category = u32;
 pub type Feature = usize;
 
+use std::rc::Rc;
+
 pub struct DataSet<T: RecordMeta> {
     pub records: Vec<(T, Target)>,
     pub target_count: usize
@@ -31,7 +33,7 @@ pub trait RecordMeta {
 
 pub type Criterion<T> = Fn(&T) -> bool;
 
-pub type Solver<T> = Fn(&DataSet<T>, &DataSetView, &Criterion<T>) -> f64;
+pub type Solver<T> = Fn(&Vec<Rc<(T, u32)>>, &Criterion<T>) -> f64;
 
 pub type DataSetView = Vec<usize>;
 

@@ -1,12 +1,12 @@
 use super::super::api;
 
-pub fn information_gain<T: api::RecordMeta>(data: &api::DataSet<T>, view: &api::DataSetView, criterion: &api::Criterion<T>) -> f64 {
-	let e = target_entropy(data, view);
-	let fe = entropy(data, view, criterion);
+pub fn information_gain<T: api::RecordMeta>(data: &api::DataSet<T>, criterion: &api::Criterion<T>) -> f64 {
+	let e = target_entropy(data);
+	let fe = entropy(data, criterion);
 	e - fe
 }
 
-fn entropy_helper<T: api::RecordMeta>(data: &api::DataSet<T>, view: &api::DataSetView, value: bool, criterion: &api::Criterion<T>) -> f64 {
+fn entropy_helper<T: api::RecordMeta>(data: &api::DataSet<T>, view: &api::DataSetView, criterion: &api::Criterion<T>) -> f64 {
 	let mut total = 0;
 	let mut classes = vec![0; data.target_count];
 	for index in view.iter() {
@@ -46,7 +46,7 @@ fn entropy<T: api::RecordMeta>(data: &api::DataSet<T>, view: &api::DataSetView, 
 	result
 }
 
-fn target_entropy<T: api::RecordMeta>(data: &api::DataSet<T>, view: &api::DataSetView) -> f64 {
+fn target_entropy<T: api::RecordMeta>(data: &api::DataSet<T>) -> f64 {
 	let total = data.records.len();
 	let mut classes = vec![0; data.target_count];
 	for index in view.iter() {
