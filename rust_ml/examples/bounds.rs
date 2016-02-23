@@ -13,12 +13,12 @@ fn main() {
     println!("{:?}", bounds1);
     let _ = bounds::bounds_criterions(&iris, &bounds::uniform_selector, 5usize);
     for record in iris.records.iter() {
-        let vectorized = vectorize::vectorize(&record.0);
+        let vectorized = vectorize::vectorize(&record.0, false);
         println!("{:?}", vectorized);
     }
     let simple = simple::read_data();
     for record in simple.records.iter() {
-        let vectorized = vectorize::vectorize(&record.0);
+        let vectorized = vectorize::vectorize(&record.0, true);
         println!("{:?}", vectorized);
     }
 }

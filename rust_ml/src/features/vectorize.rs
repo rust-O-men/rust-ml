@@ -1,7 +1,10 @@
 use super::super::api;
 
-pub fn vectorize<T: api::RecordMeta>(record: &T) -> Vec<api::Number> {
+pub fn vectorize<T: api::RecordMeta>(record: &T, add_x0: bool) -> Vec<api::Number> {
     let mut result = Vec::new();
+    if add_x0 {
+        result.push(1.0);
+    }
     for f in 0..record.feature_count() {
         match record.feature_type(f) {
             api::FeatureType::Number => {
