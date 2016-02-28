@@ -14,14 +14,12 @@ enum Node<T> {
 
 
 pub fn id3<T:api::RecordMeta+Clone>(data: &api::DataSet<T>, solver: &api::Solver<T>, criterions: &Vec<Rc<api::Criterion<T>>>) -> Tree<T> {
-    let rc_data:Vec<Rc<(T, u32)>> = data.records.iter().cloned().map(|x| Rc::new(x)).collect();
-    //let rcCriterions = criterions.iter().map(|x| Rc::new(x)).collect();
     Tree {
-        root: create_node(&rc_data, solver, criterions.clone())
+        root: create_node(&data, solver, criterions.clone())
     }
 }
 
-fn create_node<T:api::RecordMeta>(data: &Vec<Rc<(T, u32)>>,
+fn create_node<T:api::RecordMeta>(data: &api::DataSet<T>,
                                   solver: &api::Solver<T>,
                                   criterions: Vec<Rc<api::Criterion<T>>>)
                                   -> Option<Box<Node<T>>> {
@@ -30,7 +28,11 @@ fn create_node<T:api::RecordMeta>(data: &Vec<Rc<(T, u32)>>,
         return Some(Box::new(Node::Target(calculate_target(data))));
     }
 
-    let mut scores:Vec<(usize, Rc<api::Criterion<T>>,f64)> = criterions.iter().enumerate().map(|x| {(x.0, x.1.clone(), solver(data, x.1.as_ref()))}).collect();
+    let mut scores:Vec<(usize, Rc<api::Criterion<T>>,f64)> = criterions
+        .iter()
+        .enumerate()
+        .map(|x| {(x.0, x.1.clone(), solver(data, x.1.as_ref()))})
+        .collect();
     scores.sort_by(|x, y|
                    match (x, y) {
                        (&(_, _, a), &(_, _, b)) if a > b => Ordering::Less,
@@ -38,45 +40,25 @@ fn create_node<T:api::RecordMeta>(data: &Vec<Rc<(T, u32)>>,
                        (_, _) => Ordering::Equal
                    });
     let score = scores.first().unwrap();
-    let crits:Vec<Rc<api::Criterion<T>>> = criterions.iter().enumerate().filter(|x| x.0 != score.0).map(|x| x.1).cloned().collect();
-    let mut left_records = Vec::new();
-    let mut right_records = Vec::new();
-    for i in data {
-        if score.1(&i.0) {
-            right_records.push(i.clone())
-        } else {
-            left_records.push(i.clone())
-        }
-    }
-    Some(Box::new(Node::Fork(create_node(&left_records, solver, crits.clone()),
-                    create_node(&right_records, solver, crits.clone()),
-                    score.1.clone())))
+    let crits:Vec<Rc<api::Criterion<T>>> = criterions
+        .iter()
+        .enumerate()
+        .filter(|x| x.0 != score.0).map(|x| x.1)
+        .cloned()
+        .collect();
+
+    let (ls, rs) = data.split(score.1.as_ref());
+    Some(Box::new(Node::Fork(
+        create_node(&ls, solver, crits.clone()),
+        create_node(&rs, solver, crits.clone()),
+        score.1.clone())))
 }
 
-pub fn class_count<T: api::RecordMeta>(data: &Vec<Rc<(T, u32)>>) -> Vec<(api::Target, usize)> {
-    let mut classes = Vec::new();
-    classes = data.iter().map(|x| x.1).collect();
-    classes.sort_by(|x, y|
-                    match (x, y) {
-                        (a, b) if a > b => Ordering::Less,
-                        (a, b) if a < b => Ordering::Greater,
-                        (_, _) => Ordering::Equal
-                    });
-    let mut sum = Vec::new();
-    for c in classes {
-        match (c, sum.pop()) {
-            (a, None) => {sum.push((a, 1));},
-            (a, Some((b, n))) if a == b => {sum.push((b, n + 1));},
-            (a, Some((b, n))) if a != b => {sum.push((a, n)); sum.push((b, 1));},
-            (_,Some(_)) => unreachable!()
-        }
+fn calculate_target<T: api::RecordMeta>(data: &api::DataSet<T>) -> api::Target {
+    let mut sum:Vec<(api::Target, usize)> = Vec::new();
+    for (k, v) in data.class_count() {
+        sum.push((k, v));
     }
-    sum
-}
-
-
-fn calculate_target<T: api::RecordMeta>(data: &Vec<Rc<(T, u32)>>) -> api::Target {
-    let mut sum = class_count(data);
     sum.sort_by(|x, y|
                 match (x, y) {
                     (&(_, a), &(_, b)) if a > b => Ordering::Less,
