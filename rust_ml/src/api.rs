@@ -10,7 +10,6 @@ use std::iter::FromIterator;
 use std::iter::IntoIterator;
 use std::slice::Iter;
 
-/* TODO: perhaps Target should be optional */
 pub struct DataSet<T:RecordMeta>(Vec<Rc<(T, Target)>>, HashSet<DataSetMeta>);
 #[derive(PartialEq, Eq, Hash)]
 pub struct DataSetMeta(Target);
@@ -70,6 +69,24 @@ impl<T:RecordMeta> DataSet<T> {
 
     pub fn total_count(&self) -> usize {
         self.0.len()
+    }
+
+    pub fn split(&self, criterion: &Criterion<T>) -> (DataSet<T>, DataSet<T>) {
+        let mut left = DataSet::new();
+        let mut right = DataSet::new();
+        for f in self.iter() {
+            if criterion(&f.0) {
+                left.add_tuple(f.clone());
+            }
+            else {
+                right.add_tuple(f.clone())
+            }
+        }
+        (left, right)
+    }
+
+    pub fn split_positive(&self, criterion: &Criterion<T>) -> DataSet<T> {
+        self.iter().filter(|x| criterion(&x.0)).cloned().collect()
     }
 }
 

@@ -20,7 +20,7 @@ fn entropy_helper<T: api::RecordMeta>(data: &api::DataSet<T>) -> f64 {
 
 fn entropy<T: api::RecordMeta>(data: &api::DataSet<T>, criterion: &api::Criterion<T>) -> f64 {
     let total = data.total_count();
-    let ds = data.iter().filter(|x| criterion(&x.0)).cloned().collect();
+    let ds = data.split_positive(criterion);
     let mut result = 0f64;
     entropy_helper(&ds)
 }
