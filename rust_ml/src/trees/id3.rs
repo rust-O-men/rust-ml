@@ -68,25 +68,33 @@ fn calculate_target<T: api::RecordMeta>(data: &api::DataSet<T>) -> api::Target {
     sum.first().unwrap().0
 }
 
-fn apply_node<T: api::RecordMeta>(node: &Option<Box<Node<T>>>, record: &T, criterions: &Vec<Box<api::Criterion<T>>>) -> api::Target {
-    /*
-        match node {
-        &Some(box Node::Target(target)) => target,
-        &Some(box Node::Fork(left, right, criterion)) => {
-            if criterions[criterion](record) {
-                apply_node(&right, record, criterions)
-            } else {
-                apply_node(&left, record, criterions)
-            }
-        }
+/*
+impl<T: api::RecordMeta> Fn<T> for Tree<T> {
+    fn call(&self, r:&T) -> Self::Output {
+        self.apply_node(r)
     }
-     */
-    return 1;
+}
+*/
+
+fn apply_node<T: api::RecordMeta>(node: &Option<Box<Node<T>>>, record: &T) -> api::Target {
+    match node {
+        &Some(ref n) => match n.as_ref() {
+            &Node::Target(target) => target,
+            &Node::Fork(ref left, ref right, ref criterion) => {
+                if criterion(record) {
+                    apply_node(&right, record)
+                } else {
+                    apply_node(&left, record)
+                }
+            }
+        },
+        &None => unreachable!()
+    }
 }
 
 impl<T: api::RecordMeta> Tree<T> {
 
-    pub fn apply(&self, record: &T, criterions: &Vec<Box<api::Criterion<T>>>) -> api::Target {
-        apply_node(&self.root, record, criterions)
+    pub fn apply(&self, record: &T) -> api::Target {
+        apply_node(&self.root, record)
     }
 }
