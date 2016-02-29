@@ -71,24 +71,20 @@ pub const B_CATEGORY: api::Category = 1;
 pub const C_CATEGORY: api::Category = 2;
 
 pub fn read_data() -> api::DataSet<Record> {
-    let result = api::DataSet{
-        records: vec![
-            (Record{category: A_CATEGORY, number: 70.0, boolean: true }, TARGET_1),
-            (Record{category: A_CATEGORY, number: 90.0, boolean: true }, TARGET_2),
-            (Record{category: A_CATEGORY, number: 85.0, boolean: false}, TARGET_2),
-            (Record{category: A_CATEGORY, number: 95.0, boolean: false}, TARGET_2),
-            (Record{category: A_CATEGORY, number: 70.0, boolean: false}, TARGET_1),
-            (Record{category: B_CATEGORY, number: 90.0, boolean: true }, TARGET_1),
-            (Record{category: B_CATEGORY, number: 78.0, boolean: false}, TARGET_1),
-            (Record{category: B_CATEGORY, number: 65.0, boolean: true }, TARGET_1),
-            (Record{category: B_CATEGORY, number: 75.0, boolean: false}, TARGET_1),
-            (Record{category: C_CATEGORY, number: 80.0, boolean: true }, TARGET_2),
-            (Record{category: C_CATEGORY, number: 70.0, boolean: true }, TARGET_2),
-            (Record{category: C_CATEGORY, number: 80.0, boolean: false}, TARGET_1),
-            (Record{category: C_CATEGORY, number: 80.0, boolean: false}, TARGET_1),
-            (Record{category: C_CATEGORY, number: 96.0, boolean: false}, TARGET_1)
-        ],
-        target_count: 2
-    };
+    let mut result = api::DataSet::new();
+    result.add(Record{category: A_CATEGORY, number: 70.0, boolean: true }, TARGET_1);
+    result.add(Record{category: A_CATEGORY, number: 90.0, boolean: true }, TARGET_2);
+    result.add(Record{category: A_CATEGORY, number: 85.0, boolean: false}, TARGET_2);
+    result.add(Record{category: A_CATEGORY, number: 95.0, boolean: false}, TARGET_2);
+    result.add(Record{category: A_CATEGORY, number: 70.0, boolean: false}, TARGET_1);
+    result.add(Record{category: B_CATEGORY, number: 90.0, boolean: true }, TARGET_1);
+    result.add(Record{category: B_CATEGORY, number: 78.0, boolean: false}, TARGET_1);
+    result.add(Record{category: B_CATEGORY, number: 65.0, boolean: true }, TARGET_1);
+    result.add(Record{category: B_CATEGORY, number: 75.0, boolean: false}, TARGET_1);
+    result.add(Record{category: C_CATEGORY, number: 80.0, boolean: true }, TARGET_2);
+    result.add(Record{category: C_CATEGORY, number: 70.0, boolean: true }, TARGET_2);
+    result.add(Record{category: C_CATEGORY, number: 80.0, boolean: false}, TARGET_1);
+    result.add(Record{category: C_CATEGORY, number: 80.0, boolean: false}, TARGET_1);
+    result.add(Record{category: C_CATEGORY, number: 96.0, boolean: false}, TARGET_1);
     result
 }
