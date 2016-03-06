@@ -9,8 +9,8 @@ fn main() {
     let simple = simple::read_data();
     let w = gd::gd(&simple, &|x| if x > 0.0 {x} else {0.0}, 0.00001);
     println!("{:?}", w);
-    let t0 = gd::classify(&simple.records[0].0, &w);
+    let t0 = gd::classify(&simple.record_clone(0), &w);
     println!("{}", t0);
-    let t1 = gd::classify(&simple.records[1].0, &w);
+    let t1 = gd::classify(&simple.record_clone(0), &w);
     println!("{}", t1);
 }

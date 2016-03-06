@@ -15,6 +15,6 @@ fn main() {
         Box::new(|rec: &simple::Record| rec.number > 80.0)
     ];
     let tree = id3::id3(&data, &gain::information_gain, &criterions);
-    let target = tree.apply(&data.records[1].0, &criterions);
+    let target = tree.apply(&data.record_clone(1), &criterions);
     println!("{}", target);
 }

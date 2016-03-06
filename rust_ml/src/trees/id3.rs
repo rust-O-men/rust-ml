@@ -11,7 +11,7 @@ enum Node {
 
 pub fn id3<T: api::RecordMeta>(data: &api::DataSet<T>, solver: &api::Solver<T>, criterions: &Vec<Box<api::Criterion<T>>>) -> Tree {
     Tree {
-        root: create_node(data, &api::all_view(data), solver, criterions)
+        root: create_node(data, &api::DataSetView::full(data.len()), solver, criterions)
     }
 }
 
@@ -26,14 +26,13 @@ fn create_node<T: api::RecordMeta>(data: &api::DataSet<T>, view: &api::DataSetVi
         }
     }
     let criterion = &criterions[index];
-    let mut left_records = Vec::new();
-    let mut right_records = Vec::new();
-    for i in view.iter() {
-        let record = &data.records[*i];
+    let mut left_records = api::DataSetView::empty();
+    let mut right_records = api::DataSetView::empty();
+    for (i, record) in data.view_records(view).enumerate() {
         if criterion(&record.0) {
-            right_records.push(*i)
+            right_records.add_index(i)
         } else {
-            left_records.push(*i)
+            left_records.add_index(i)
         }
     }
     if right_records.is_empty() || left_records.is_empty() {
@@ -49,9 +48,8 @@ fn create_node<T: api::RecordMeta>(data: &api::DataSet<T>, view: &api::DataSetVi
 }
 
 fn calculate_target<T: api::RecordMeta>(data: &api::DataSet<T>, view: &api::DataSetView) -> api::Target {
-    let mut classes = vec![0; data.target_count];
-    for index in view.iter() {
-        let record = &data.records[*index];
+    let mut classes = vec![0; data.target_count()];
+    for record in data.view_records(view) {
         classes[record.1 as usize] += 1;
     }
     let mut max_class = 0;

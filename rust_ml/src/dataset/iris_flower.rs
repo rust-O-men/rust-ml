@@ -1,5 +1,6 @@
 use super::super::api;
 
+#[derive(Clone)]
 pub struct Record {
     pub sepal_length: api::Number,
     pub sepal_width: api::Number,
@@ -62,8 +63,17 @@ pub const VERSICOLOR: api::Target = 1;
 pub const VIRGINICA: api::Target = 2;
 
 pub fn read_data() -> api::DataSet<Record> {
-    let result = api::DataSet{
-        records: vec![
+    let result = api::DataSet::new(
+        api::DataSetMeta {
+            target_count: 3,
+            features: vec![
+                api::FeatureType::Number,
+                api::FeatureType::Number,
+                api::FeatureType::Number,
+                api::FeatureType::Number
+            ]
+        },        
+        vec![
             (Record{sepal_length: 5.1, sepal_width: 3.5, petal_length: 1.4, petal_width: 0.2}, SETOSA),
             (Record{sepal_length: 4.9, sepal_width: 3.0, petal_length: 1.4, petal_width: 0.2}, SETOSA),
             (Record{sepal_length: 4.7, sepal_width: 3.2, petal_length: 1.3, petal_width: 0.2}, SETOSA),
@@ -214,8 +224,7 @@ pub fn read_data() -> api::DataSet<Record> {
             (Record{sepal_length: 6.5, sepal_width: 3.0, petal_length: 5.2, petal_width: 2.0}, VIRGINICA),
             (Record{sepal_length: 6.2, sepal_width: 3.4, petal_length: 5.4, petal_width: 2.3}, VIRGINICA),
             (Record{sepal_length: 5.9, sepal_width: 3.0, petal_length: 5.1, petal_width: 1.8}, VIRGINICA)
-        ],
-        target_count: 3
-    };
+        ]
+    );
     result
 }

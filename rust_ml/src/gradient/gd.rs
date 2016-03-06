@@ -26,7 +26,7 @@ fn normalize_target(t: api::Target) -> api::Number {
 }
 
 fn q<T: api::RecordMeta>(ds: &api::DataSet<T>, params: &Parameters, z: &Fn(api::Number) -> api::Number) -> api::Number {
-    ds.records.iter().fold(0.0, |acc, ref rec| acc + z(f(&rec.0, params) * normalize_target(rec.1)))
+    ds.records().fold(0.0, |acc, ref rec| acc + z(f(&rec.0, params) * normalize_target(rec.1)))
 }
 
 fn q_partial_derivative<T: api::RecordMeta>(ds: &api::DataSet<T>, params: &Parameters, z: &Fn(api::Number) -> api::Number, i: usize, h: api::Number) -> api::Number {
@@ -43,10 +43,10 @@ fn q_gradient<T: api::RecordMeta>(ds: &api::DataSet<T>, params: &Parameters, z: 
 }
 
 pub fn gd<T: api::RecordMeta>(ds: &api::DataSet<T>, z: &Fn(api::Number) -> api::Number, e: f64) -> Parameters {
-    if ds.target_count != 2 {
+    if ds.target_count() != 2 {
         panic!("Only binary classification supported!");
     }
-    let mut params = vec![0.0; ds.records[0].0.feature_count() + 1];
+    let mut params = vec![0.0; ds.feature_count() + 1];
     let mut value = q(ds, &params, z);
     loop {
         let gradient = q_gradient(ds, &params, z, e);

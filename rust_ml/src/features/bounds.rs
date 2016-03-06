@@ -14,8 +14,8 @@ fn number_bound<T: api::RecordMeta>(record: &T, feature: api::Feature, bound: ap
 
 pub fn bounds_criterions<T: api::RecordMeta>(data: &api::DataSet<T>, selector: &Selector<T>, n: usize) -> Vec<Box<api::Criterion<T>>> {
     let mut result: Vec<Box<api::Criterion<T>>> = Vec::new();
-    for f in 0..data.records[0].0.feature_count() {
-        if data.records[0].0.feature_type(f) == api::FeatureType::Number {
+    for f in 0..data.feature_count() {
+        if data.feature_type(f) == api::FeatureType::Number {
             let bounds = selector(data, f, n);
             for bound in bounds {
                 result.push(Box::new(move |rec: &T| number_bound(rec, f, bound)));
@@ -30,7 +30,7 @@ pub fn uniform_selector<T: api::RecordMeta>(data: &api::DataSet<T>, feature: api
     let mut set: HashSet<u64> = HashSet::new();
     let mut result = Vec::new();
     let mut i = 0;
-    for (j, record) in data.records.iter().enumerate() {
+    for (j, record) in data.records().enumerate() {
         if i != j % n {
             match record.0.number_value(feature) {
                 Some(v) if !v.is_nan() => set.insert(unsafe{mem::transmute(v)}),

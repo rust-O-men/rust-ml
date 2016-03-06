@@ -1,10 +1,13 @@
 use super::super::api;
 
+
+#[derive(Clone)]
 pub struct Record {
     pub category: api::Category,
     pub number: api::Number,
     pub boolean: bool
 }
+
 
 impl api::RecordMeta for Record {
 
@@ -62,16 +65,27 @@ impl api::RecordMeta for Record {
 
 }
 
+
 pub const TARGET_1: api::Target = 0;
 pub const TARGET_2: api::Target = 1;
+
 
 pub const A_CATEGORY: api::Category = 0;
 pub const B_CATEGORY: api::Category = 1;
 pub const C_CATEGORY: api::Category = 2;
 
+
 pub fn read_data() -> api::DataSet<Record> {
-    let result = api::DataSet{
-        records: vec![
+    let result = api::DataSet::new(
+        api::DataSetMeta {
+            target_count: 2,
+            features: vec![
+                api::FeatureType::Category,
+                api::FeatureType::Number,
+                api::FeatureType::Boolean
+            ]
+        },
+        vec![
             (Record{category: A_CATEGORY, number: 70.0, boolean: true }, TARGET_1),
             (Record{category: A_CATEGORY, number: 90.0, boolean: true }, TARGET_2),
             (Record{category: A_CATEGORY, number: 85.0, boolean: false}, TARGET_2),
@@ -86,8 +100,7 @@ pub fn read_data() -> api::DataSet<Record> {
             (Record{category: C_CATEGORY, number: 80.0, boolean: false}, TARGET_1),
             (Record{category: C_CATEGORY, number: 80.0, boolean: false}, TARGET_1),
             (Record{category: C_CATEGORY, number: 96.0, boolean: false}, TARGET_1)
-        ],
-        target_count: 2
-    };
+        ]
+    );
     result
 }
