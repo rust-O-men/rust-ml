@@ -1,5 +1,25 @@
 use super::super::api;
 
+pub fn vector_len<T: api::RecordMeta>(ds: &api::DataSet<T>) -> usize {
+    let mut result = 0;
+    for f in 0..ds.feature_count() {
+        match ds.feature_type(f) {
+            api::FeatureType::Number => {
+                result += 1;
+            },
+            api::FeatureType::Boolean => {
+                result += 1;
+            },
+            api::FeatureType::Category => {
+                for v in 0..ds.category_count(f) {
+                    result += 1;
+                };  
+            }
+        };
+    }    
+    result
+}
+
 pub fn vectorize<T: api::RecordMeta>(record: &T, add_x0: bool) -> Vec<api::Number> {
     let mut result = Vec::new();
     if add_x0 {

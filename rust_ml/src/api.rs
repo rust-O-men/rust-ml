@@ -123,6 +123,10 @@ impl<T: RecordMeta> DataSet<T> {
         self.meta.features[feature].clone()
     }    
 
+    pub fn category_count(&self, feature: Feature) -> usize {
+        self.records[0].0.category_count(feature)
+    }    
+
     pub fn records(&self) -> DataSetIterator<T> {
         DataSetIterator{records: &self.records, current: 0, max: self.records.len(), view: None}
     }

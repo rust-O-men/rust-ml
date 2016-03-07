@@ -1,7 +1,15 @@
+extern crate rand;
+
+use self::rand::{thread_rng, Rng};
+
 use super::super::api;
 use super::super::features::vectorize;
 
+
 pub type Parameters = Vec<api::Number>;
+
+pub type Gradient<T> = Fn(&api::DataSet<T>) -> Parameters;
+
 
 pub fn classify<T: api::RecordMeta>(record: &T, params: &Parameters) -> api::Target {
     let v = f(record, params);
@@ -12,10 +20,12 @@ pub fn classify<T: api::RecordMeta>(record: &T, params: &Parameters) -> api::Tar
     }
 }
 
+
 fn f<T: api::RecordMeta>(record: &T, params: &Parameters) -> api::Number {
     let x = vectorize::vectorize(record, true);
     x.iter().zip(params.iter()).fold(0.0, |acc, (&x, &w)| acc + x * w)
- }
+}
+
 
 fn normalize_target(t: api::Target) -> api::Number {
     match t {
@@ -25,39 +35,65 @@ fn normalize_target(t: api::Target) -> api::Number {
     }
 }
 
-fn q<T: api::RecordMeta>(ds: &api::DataSet<T>, params: &Parameters, z: &Fn(api::Number) -> api::Number) -> api::Number {
-    ds.records().fold(0.0, |acc, ref rec| acc + z(f(&rec.0, params) * normalize_target(rec.1)))
+
+fn q<T: api::RecordMeta>(ds: &api::DataSet<T>, params: &Parameters) -> api::Number {
+    let m = ds.records().map(|ref rec| f(&rec.0, params) * normalize_target(rec.1));
+    m.map(|m| if m < 0.0 {m} else {0.0}).fold(0.0, |acc, mi| acc + mi)
 }
 
-fn q_partial_derivative<T: api::RecordMeta>(ds: &api::DataSet<T>, params: &Parameters, z: &Fn(api::Number) -> api::Number, i: usize, h: api::Number) -> api::Number {
-    let next: Parameters = params.iter().enumerate().map(|(n, &x)| x + if i == n {h} else {0.0}).collect();
-    (q(ds, &next, z) - q(ds, params, z)) / h
-}
 
-fn q_gradient<T: api::RecordMeta>(ds: &api::DataSet<T>, params: &Parameters, z: &Fn(api::Number) -> api::Number, h: api::Number) -> Parameters {
-    let mut result = Vec::new();
-    for i in 0..params.len() {
-        result.push(q_partial_derivative(ds, params, z, i, h));
-    } 
+pub fn gradient<T: api::RecordMeta>(ds: &api::DataSet<T>) -> Parameters { 
+    let mut result = vec![0.0; vectorize::vector_len(ds) + 1];
+    for record in ds.records() {
+        let x = vectorize::vectorize(&record.0, true);
+        let y = normalize_target(record.1);
+        for (i, xi) in x.iter().enumerate() {
+            result[i] -= xi * y;
+        }
+    }
     result
 }
 
-pub fn gd<T: api::RecordMeta>(ds: &api::DataSet<T>, z: &Fn(api::Number) -> api::Number, e: f64) -> Parameters {
+
+pub fn stochastic_gradient<T: api::RecordMeta>(ds: &api::DataSet<T>) -> Parameters { 
+    let mut rng = thread_rng();
+    let rec_no = rng.gen_range(0usize, ds.len());
+    let mut found = None;
+    for (i, rec) in ds.records().enumerate() {
+        if i == rec_no {
+            found = Some(rec);
+            break;
+        }
+    };
+    let record = found.unwrap();
+    let x = vectorize::vectorize(&record.0, true);
+    let y = normalize_target(record.1);
+    x.iter().map(|xi| -y * xi).collect()
+}
+
+
+fn distance(a: &Parameters, b: &Parameters) -> api::Number {
+    a.iter().zip(b.iter()).fold(0.0, |acc, (&ai, &bi)| acc + (ai - bi).powf(2.0)).sqrt()
+}
+
+
+fn next_parameters(old: &Parameters, new: &Parameters, step: api::Number) -> Parameters {
+    old.iter().zip(new.iter()).map(|(oi, ni)| oi - step * ni).collect()
+}
+
+
+pub fn gd<T: api::RecordMeta>(ds: &api::DataSet<T>, grad: &Gradient<T>, step: api::Number, e: api::Number) -> Parameters {
     if ds.target_count() != 2 {
-        panic!("Only binary classification supported!");
+        panic!("Not a binary target!");
     }
-    let mut params = vec![0.0; ds.feature_count() + 1];
-    let mut value = q(ds, &params, z);
+    let mut params = vec![0.0; vectorize::vector_len(ds) + 1];
     loop {
-        let gradient = q_gradient(ds, &params, z, e);
-        for (i, g) in gradient.iter().enumerate() {
-            params[i] -= 0.01 * g;
-        }
-        let next = q(ds, &params, z);
-        if (value - next) < e {
-            return params
+        let next = next_parameters(&params, &grad(ds), step);
+        if distance(&next, &params) < e {
+            break;
         } else {
-            value = next;
+            params = next;
         }
-    }
+    };
+    params
 }
