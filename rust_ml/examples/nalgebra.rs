@@ -11,7 +11,7 @@ fn main() {
 	let dot = nalgebra::dot(&vec1, &vec2);
 	println!("{}", dot);
 	let vec3 = vec2 * 10.0;
-	println!("{:?}", vec3);
+	println!("xxx{:?}", vec3);
 	let mat1 = DMat::from_row_vec(3, 3, &vec![1, 2, 3, 4, 5, 6, 7, 8, 9]);
 	println!("{:?}", mat1);
 	let mat2 = DMat::from_row_vec(3, 3, &vec![9, 8, 7, 6, 5, 4, 3, 2, 1]);
