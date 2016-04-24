@@ -5,4 +5,4 @@ authors = ["Vasily Levchenko <minamoto@yandex-team.ru>"]
 
 [dependencies]
 rand = "0.3"
-nalgebra = "*.*"
+nalgebra = "0.8.1"

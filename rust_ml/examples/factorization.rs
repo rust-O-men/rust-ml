@@ -1,24 +1,27 @@
 extern crate nalgebra;
 extern crate rust_ml;
 
-use nalgebra::DMat;
+use nalgebra::DMatrix;
 use rust_ml::matrix::mf;
 
 fn main() {
-    println!("Hello, factorization!");
-    let r = DMat::from_row_vec(8, 2, &vec![
-        29.0, 29.0, 
-        43.0, 33.0, 
-        15.0, 25.0, 
-        40.0, 28.0, 
-        24.0, 11.0, 
-        29.0, 29.0, 
-        37.0, 23.0, 
-        21.0, 6.0]
-    );
-    let (u, q) = mf::factorize(&r, 0.001, 1usize);
+    println!("Hello, matrix factorization!");
+    let r = DMatrix::from_row_vector(5, 4, &vec![
+        5.0, 3.0, 0.0, 1.0,
+        4.0, 0.0, 0.0, 1.0,
+        1.0, 1.0, 0.0, 5.0,
+        1.0, 0.0, 0.0, 4.0,
+        0.0, 1.0, 5.0, 4.0,
+
+    ]);
+    let (u, q) = mf::factorize(&r, 2usize, 0.0002, 5000usize, 0.02);
     println!("{:?}", u);
     println!("{:?}", q);
+    println!("Original");
+    println!("{:?}", r);
+    let r_hat = u * nalgebra::transpose(&q);
+    println!("Factorized");
+    println!("{:?}", r_hat);
 }
 
 
